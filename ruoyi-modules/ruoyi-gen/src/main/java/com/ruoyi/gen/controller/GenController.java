@@ -50,6 +50,8 @@ public class GenController extends BaseController
     @GetMapping("/list")
     public TableDataInfo genList(GenTable genTable)
     {
+        System.out.println("genTable===================="+genTable.getTableName());
+
         startPage();
         List<GenTable> list = genTableService.selectGenTableList(genTable);
         return getDataTable(list);

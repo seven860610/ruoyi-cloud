@@ -28,6 +28,25 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils
 
     public static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
 
+    public static String format(Date date) {
+        return format(date, YYYY_MM_DD);
+    }
+
+    /**
+     * 日期格式化 日期格式为：yyyy-MM-dd
+     * @param date  日期
+     * @param pattern  格式，如：DateUtils.DATE_TIME_PATTERN
+     * @return  返回yyyy-MM-dd格式日期
+     */
+    public static String format(Date date, String pattern) {
+        if(date != null){
+            SimpleDateFormat df = new SimpleDateFormat(pattern);
+            return df.format(date);
+        }
+        return null;
+    }
+
+
     private static String[] parsePatterns = {
             "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM",
             "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM",

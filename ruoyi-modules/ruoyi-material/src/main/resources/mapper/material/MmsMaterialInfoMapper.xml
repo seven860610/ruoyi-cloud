@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.material.mapper.MmsMaterialInfoMapper">
+    
+    <resultMap type="MmsMaterialInfo" id="MmsMaterialInfoResult">
+        <result property="id"    column="ID"    />
+        <result property="materialName"    column="material_name"    />
+        <result property="materialType"    column="material_type"    />
+        <result property="specs"    column="specs"    />
+        <result property="producer"    column="producer"    />
+        <result property="picAddr"    column="pic_addr"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectMmsMaterialInfoVo">
+        select ID, material_name, material_type, specs, producer, pic_addr, create_time, update_time from mms_material_info
+    </sql>
+
+    <select id="selectMmsMaterialInfoList" parameterType="MmsMaterialInfo" resultMap="MmsMaterialInfoResult">
+        <include refid="selectMmsMaterialInfoVo"/>
+        <where>  
+            <if test="materialName != null  and materialName != ''"> and material_name like concat('%', #{materialName}, '%')</if>
+            <if test="materialType != null  and materialType != ''"> and material_type = #{materialType}</if>
+            <if test="specs != null  and specs != ''"> and specs = #{specs}</if>
+            <if test="producer != null  and producer != ''"> and producer = #{producer}</if>
+            <if test="picAddr != null  and picAddr != ''"> and pic_addr = #{picAddr}</if>
+        </where>
+    </select>
+    
+    <select id="selectMmsMaterialInfoById" parameterType="Long" resultMap="MmsMaterialInfoResult">
+        <include refid="selectMmsMaterialInfoVo"/>
+        where ID = #{id}
+    </select>
+        
+    <insert id="insertMmsMaterialInfo" parameterType="MmsMaterialInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into mms_material_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="materialName != null and materialName != ''">material_name,</if>
+            <if test="materialType != null and materialType != ''">material_type,</if>
+            <if test="specs != null and specs != ''">specs,</if>
+            <if test="producer != null">producer,</if>
+            <if test="picAddr != null">pic_addr,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="materialName != null and materialName != ''">#{materialName},</if>
+            <if test="materialType != null and materialType != ''">#{materialType},</if>
+            <if test="specs != null and specs != ''">#{specs},</if>
+            <if test="producer != null">#{producer},</if>
+            <if test="picAddr != null">#{picAddr},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMmsMaterialInfo" parameterType="MmsMaterialInfo">
+        update mms_material_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="materialName != null and materialName != ''">material_name = #{materialName},</if>
+            <if test="materialType != null and materialType != ''">material_type = #{materialType},</if>
+            <if test="specs != null and specs != ''">specs = #{specs},</if>
+            <if test="producer != null">producer = #{producer},</if>
+            <if test="picAddr != null">pic_addr = #{picAddr},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where ID = #{id}
+    </update>
+
+    <delete id="deleteMmsMaterialInfoById" parameterType="Long">
+        delete from mms_material_info where ID = #{id}
+    </delete>
+
+    <delete id="deleteMmsMaterialInfoByIds" parameterType="String">
+        delete from mms_material_info where ID in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

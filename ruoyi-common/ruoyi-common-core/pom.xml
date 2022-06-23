@@ -119,6 +119,13 @@
             <artifactId>swagger-annotations</artifactId>
         </dependency>
 
+        <!--阿里云对象存储-->
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+
     </dependencies>
 
 </project>
