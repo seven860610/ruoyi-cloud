@@ -59,28 +59,6 @@
           v-hasPermi="['material:detail:edit']"
         >添加明细</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['material:order:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['material:info:remove']"
-        >删除</el-button>
-      </el-col>
     </el-row>
     <div id="app">
         <el-form  ref="detailForm" :model="detailForm" :rules="detailRules" auto-complete="on">
@@ -145,14 +123,8 @@
                 <el-button
                   size="mini"
                   type="text"
-                  icon="el-icon-edit"
-                  @click="handleUpdate(scope.row)"
-                >修改</el-button>
-                <el-button
-                  size="mini"
-                  type="text"
                   icon="el-icon-delete"
-                  @click="handleDelete(scope.row)"
+                  @click="delDetailCol(scope.row,scope.$index)"
                 >删除</el-button>
                 <el-button
                   size="mini"
@@ -307,24 +279,28 @@ export default {
      },
     // 增加一个空行, 用于录入或显示第一行
     addLine() {
-      if(this.form.stock != null){
-        const newLine = {
-          id: "",
-          instockNo: this.instockNo,
-          shelfNo: "",
-          materialNo: "",
-          materialName: "",
-          materialType: "",
-          materialSpecs: "",
-          nums: 1
-        };
-        this.index++;
-        this.detailForm.detailList.push(newLine);
-        this.getShelfList();
-      }else{
+      if(this.form.instockTime === null){
+        this.$toast.top('请选择日期！');
+        return false;
+      }
+      if(this.form.stock === null){
         this.$toast.top('请选择仓库！');
         return false;
       }
+      const newLine = {
+        id: "",
+        instockNo: this.instockNo,
+        shelfNo: "",
+        materialNo: "",
+        materialName: "",
+        materialType: "",
+        materialSpecs: "",
+        nums: 1
+      };
+      this.index++;
+      this.detailForm.detailList.push(newLine);
+      this.getShelfList();
+
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
@@ -369,28 +345,10 @@ export default {
          })
       });
     },
-
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      //修改入库单明细
-    },
-    /** 入库单提交 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-
-        }
-      });
-    },
     /** 删除按钮操作 */
-    handleDelete(row) {
-      const instockNos = row.instockNo || this.ids;
-      this.$modal.confirm('是否确认删除物资入库单编号为"' + instockNos + '"的数据项？').then(function() {
-        return delOrder(instockNos);
-      }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+    delDetailCol(data, index) {
+      this.detailForm.detailList.splice(index, 1);
+      this.$modal.msgSuccess("删除成功！");
     }
   }
 };
