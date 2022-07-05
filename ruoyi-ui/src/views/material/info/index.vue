@@ -81,10 +81,15 @@
           @click="handleExport"
           v-hasPermi="['material:info:export']"
         >导出</el-button>
+        <el-button
+          type="info"
+          icon="el-icon-upload2"
+          size="mini"
+          @click="handleImport"
+        >导入</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
-
     <el-table v-loading="loading" :data="infoList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="物资ID" align="center" prop="id" />
@@ -92,7 +97,11 @@
       <el-table-column label="物资类型" align="center" prop="materialType" />
       <el-table-column label="规格" align="center" prop="specs" />
       <el-table-column label="厂家" align="center" prop="producer" />
-      <el-table-column label="图片地址" align="center" prop="picAddr" />
+      <el-table-column label="图片地址" align="center" prop="picAddr" >
+        <template slot-scope="scope">
+            <img :src="scope.row.picAddr" style="width: 100px; height: 100px"/>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -109,6 +118,12 @@
             @click="handleDelete(scope.row)"
             v-hasPermi="['material:info:remove']"
           >删除</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-search"
+            @click="setImgBigger(scope.row.picAddr)"
+          >查看图片</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -146,15 +161,55 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+    <!-- 用户导入对话框 -->
+    <el-dialog :title="upload.title" :visible.sync="upload.open" width="400px">
+      <el-upload
+      ref="upload"
+      :limit="1"
+      accept=".xlsx, .xls"
+      :headers="upload.headers"
+      :action="upload.url + '?updateSupport=' + upload.updateSupport"
+      :disabled="upload.isUploading"
+      :on-progress="handleFileUploadProgress"
+      :on-success="handleFileSuccess"
+      :auto-upload="false"
+      drag
+      >
+      <i class="el-icon-upload"></i>
+      <div class="el-upload__text">
+        将文件拖到此处，或
+        <em>点击上传</em>
+      </div>
+      <div class="el-upload__tip" slot="tip">
+        <el-checkbox v-model="upload.updateSupport" />是否更新已经存在的用户数据
+        <el-link type="info" style="font-size:12px" @click="importTemplate">下载模板</el-link>
+      </div>
+      <div class="el-upload__tip" style="color:red" slot="tip">提示：仅允许导入“xls”或“xlsx”格式文件！</div>
+      </el-upload>
+      <div slot="footer" class="dialog-footer">
+      <el-button type="primary" @click="submitFileForm">确 定</el-button>
+      <el-button @click="upload.open = false">取 消</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog :visible.sync="dialogVisible">
+      <big-img
+        :ifImgShow="ifShowBigger"
+        :imgSrc="imgSrc"
+        :imgSite="imgSite"
+        @closeBigImg="ifShowBigger = false"
+      />
+    </el-dialog>
   </div>
 </template>
 <script>
 import { listInfo, getInfo, delInfo, addInfo, updateInfo } from "@/api/material/info";
 import SingleUpload from "@/views/components/upload/singleUpload" // 引入单文件上传组件
+import BigImg from "@/views/components/img/bigimg"  //引入图片放大组件
+import { getToken } from "@/utils/auth";
 
 export default {
   name: "Info",
-  components:{ SingleUpload },
+  components:{ SingleUpload,BigImg },
   data() {
     return {
       // 遮罩层
@@ -187,6 +242,13 @@ export default {
       },
       // 表单参数
       form: {},
+      //放大图片组件
+      ifShowBigger: false, //图片是否放大
+          imgSite: {
+            height: 0,
+            width: 0,
+          }, //图片属性
+      imgSrc:'', //图片路径
       // 表单校验
       rules: {
         materialName: [
@@ -204,7 +266,23 @@ export default {
         updateTime: [
           { required: true, message: "更新时间不能为空", trigger: "blur" }
         ]
-      }
+      },
+      dialogVisible: false,
+      // 用户导入参数
+      upload: {
+        // 是否显示弹出层（用户导入）
+        open: false,
+        // 弹出层标题（用户导入）
+        title: "",
+        // 是否禁用上传
+        isUploading: false,
+        // 是否更新已经存在的用户数据
+        updateSupport: 0,
+        // 设置上传的请求头部
+        headers: { Authorization: "Bearer " + getToken() },
+        // 上传的地址
+        url: process.env.VUE_APP_BASE_API + "/material/info/importData"
+      },
     };
   },
   created() {
@@ -306,7 +384,62 @@ export default {
       this.download('material/info/export', {
         ...this.queryParams
       }, `info_${new Date().getTime()}.xlsx`)
+    },
+    /**
+     * @description: 图片放大
+     * @param e
+     * @return void
+     */
+    setImgBigger(picAdrr) {
+      if (picAdrr != '') {
+        this.dialogVisible = true
+        this.ifShowBigger = true //图片放大器组件开启
+        let userAgent = navigator.userAgent //识别浏览器
+        if (userAgent.indexOf('Chrome') > -1) {
+          this.imgSrc = picAdrr //谷歌
+        } else {
+          this.imgSrc = picAdrr //其他
+        }
+        this.imgSite.height = e.target.offsetHeight //原图片高度
+        this.imgSite.width = e.target.offsetWidth //原图片宽度
+      }
+    },
+    /** 导入按钮操作 */
+    handleImport() {
+      this.upload.title = "物资导入";
+      this.upload.open = true;
+    },
+    /** 下载模板操作 */
+    /**importTemplate() {
+      importTemplate().then(response => {
+      this.download(response.msg);
+      });
+    },*/
+    /** 下载模板操作 */
+    importTemplate() {
+      this.download('material/info/importTemplate', {
+      }, `material_info_template_${new Date().getTime()}.xlsx`)
+    },
+
+
+    // 文件上传中处理
+    handleFileUploadProgress(event, file, fileList) {
+      this.upload.isUploading = true;
+    },
+    // 文件上传成功处理
+    handleFileSuccess(response, file, fileList) {
+      this.upload.open = false;
+      this.upload.isUploading = false;
+      this.$refs.upload.clearFiles();
+      this.$alert(response.msg, "导入结果", { dangerouslyUseHTMLString: true });
+      this.getList();
+    },
+    // 提交上传文件
+    submitFileForm() {
+      this.$refs.upload.submit();
     }
+
   }
 };
 </script>
+

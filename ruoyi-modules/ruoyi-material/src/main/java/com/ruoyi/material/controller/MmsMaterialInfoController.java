@@ -3,6 +3,10 @@ package com.ruoyi.material.controller;
 import java.util.List;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.common.core.utils.ServletUtils;
+import com.ruoyi.common.security.service.TokenService;
+import com.ruoyi.system.api.model.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +25,7 @@ import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.core.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.web.page.TableDataInfo;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 【请填写功能名称】Controller
@@ -34,6 +39,9 @@ public class MmsMaterialInfoController extends BaseController
 {
     @Autowired
     private IMmsMaterialInfoService mmsMaterialInfoService;
+
+    @Autowired
+    TokenService tokenService;
 
     /**
      * 查询【请填写功能名称】列表
@@ -101,5 +109,33 @@ public class MmsMaterialInfoController extends BaseController
     public AjaxResult remove(@PathVariable Long[] ids)
     {
         return toAjax(mmsMaterialInfoService.deleteMmsMaterialInfoByIds(ids));
+    }
+
+
+    /**
+     * 物资导入
+     * @param file
+     * @param updateSupport
+     * @return
+     * @throws Exception
+     */
+    @Log(title = "用户管理", businessType = BusinessType.IMPORT)
+    @RequiresPermissions("material:info:import")
+    @PostMapping("/importData")
+    public AjaxResult importData(MultipartFile file, boolean updateSupport) throws Exception
+    {
+        ExcelUtil<MmsMaterialInfo> util = new ExcelUtil<MmsMaterialInfo>(MmsMaterialInfo.class);
+        List<MmsMaterialInfo> materiaList = util.importExcel(file.getInputStream());
+        LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
+        String operName = loginUser.getUsername();
+        String message = mmsMaterialInfoService.importUser(materiaList, operName);
+        return AjaxResult.success(message);
+    }
+
+    @PostMapping("/importTemplate")
+    public void importTemplate(HttpServletResponse response) throws IOException
+    {
+        ExcelUtil<MmsMaterialInfo> util = new ExcelUtil<MmsMaterialInfo>(MmsMaterialInfo.class);
+        util.importTemplateExcel(response, "物资数据");
     }
 }

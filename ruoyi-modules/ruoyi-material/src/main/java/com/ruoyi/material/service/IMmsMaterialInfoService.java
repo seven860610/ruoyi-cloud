@@ -2,6 +2,7 @@ package com.ruoyi.material.service;
 
 import java.util.List;
 import com.ruoyi.material.domain.MmsMaterialInfo;
+import com.ruoyi.system.api.domain.SysUser;
 
 /**
  * 【请填写功能名称】Service接口
@@ -58,4 +59,14 @@ public interface IMmsMaterialInfoService
      * @return 结果
      */
     public int deleteMmsMaterialInfoById(Long id);
+
+    /**
+     * 导入用户数据
+     *
+     * @param materialList 用户数据列表
+     * @param operName 操作用户
+     * @return 结果
+     */
+    public String importUser(List<MmsMaterialInfo> materialList, String operName);
+
 }

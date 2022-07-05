@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.material.mapper.MmsInstoreOrderMapper">
+    
+    <resultMap type="MmsInstoreOrder" id="MmsInstoreOrderResult">
+        <result property="instockNo"    column="instock_no"    />
+        <result property="stock"    column="stock"    />
+        <result property="instockTime"    column="instock_time"    />
+        <result property="pennum"    column="pennum"    />
+        <result property="status"    column="status"    />
+        <result property="reviewer"    column="reviewer"    />
+        <result property="reviewTime"    column="review_time"    />
+        <result property="operator"    column="operator"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectMmsInstoreOrderVo">
+        select instock_no,stock, instock_time, pennum, status, reviewer, review_time, operator, create_time, update_time from mms_instore_order
+    </sql>
+
+    <select id="selectMmsInstoreOrderList" parameterType="MmsInstoreOrder" resultMap="MmsInstoreOrderResult">
+        <include refid="selectMmsInstoreOrderVo"/>
+        <where>  
+            <!--<if test="instockTime != null "> and instock_time = #{instockTime}</if>-->
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(instock_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(instock_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+            <if test="stock != null "> and stock = #{stock}</if>
+            <if test="pennum != null "> and pennum = #{pennum}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="reviewer != null  and reviewer != ''"> and reviewer = #{reviewer}</if>
+            <if test="reviewTime != null "> and review_time = #{reviewTime}</if>
+            <if test="operator != null  and operator != ''"> and operator = #{operator}</if>
+        </where>
+    </select>
+    
+    <select id="selectMmsInstoreOrderByInstockNo" parameterType="String" resultMap="MmsInstoreOrderResult">
+        <include refid="selectMmsInstoreOrderVo"/>
+        where instock_no = #{instockNo}
+    </select>
+        
+    <insert id="insertMmsInstoreOrder" parameterType="MmsInstoreOrder">
+        insert into mms_instore_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="instockNo != null">instock_no,</if>
+            <if test="stock != null">stock,</if>
+            <if test="instockTime != null">instock_time,</if>
+            <if test="pennum != null">pennum,</if>
+            <if test="status != null">status,</if>
+            <if test="reviewer != null">reviewer,</if>
+            <if test="reviewTime != null">review_time,</if>
+            <if test="operator != null">operator,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="instockNo != null">#{instockNo},</if>
+            <if test="stock != null">#{stock},</if>
+            <if test="instockTime != null">#{instockTime},</if>
+            <if test="pennum != null">#{pennum},</if>
+            <if test="status != null">#{status},</if>
+            <if test="reviewer != null">#{reviewer},</if>
+            <if test="reviewTime != null">#{reviewTime},</if>
+            <if test="operator != null">#{operator},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMmsInstoreOrder" parameterType="MmsInstoreOrder">
+        update mms_instore_order
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="instockTime != null">instock_time = #{instockTime},</if>
+            <if test="stock != null">stock = #{stock},</if>
+            <if test="pennum != null">pennum = #{pennum},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="reviewer != null">reviewer = #{reviewer},</if>
+            <if test="reviewTime != null">review_time = #{reviewTime},</if>
+            <if test="operator != null">operator = #{operator},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where instock_no = #{instockNo}
+    </update>
+
+    <delete id="deleteMmsInstoreOrderByInstockNo" parameterType="String">
+        delete from mms_instore_order where instock_no = #{instockNo}
+    </delete>
+
+    <delete id="deleteMmsInstoreOrderByInstockNos" parameterType="String">
+        delete from mms_instore_order where instock_no in 
+        <foreach item="instockNo" collection="array" open="(" separator="," close=")">
+            #{instockNo}
+        </foreach>
+    </delete>
+</mapper>

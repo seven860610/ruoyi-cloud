@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.material.mapper.MmsInstoreDetailMapper">
+    
+    <resultMap type="MmsInstoreDetail" id="MmsInstoreDetailResult">
+        <result property="id"    column="ID"    />
+        <result property="instockNo"    column="instock_no"    />
+        <result property="shelfNo"    column="shelf_no"    />
+        <result property="materialNo"    column="material_no"    />
+        <result property="materialName"    column="material_name"    />
+        <result property="materialType"    column="material_type"    />
+        <result property="materialSpecs"    column="material_specs"    />
+        <result property="nums"    column="nums"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectMmsInstoreDetailVo">
+        select ID, instock_no,shelf_no, material_no, material_name, material_type, material_specs, nums, create_time, update_time from mms_instore_detail
+    </sql>
+
+    <select id="selectMmsInstoreDetailList" parameterType="MmsInstoreDetail" resultMap="MmsInstoreDetailResult">
+        <include refid="selectMmsInstoreDetailVo"/>
+        <where>  
+            <if test="instockNo != null  and instockNo != ''"> and instock_no = #{instockNo}</if>
+            <if test="shelfNo != null  and shelfNo != ''"> and shelf_no = #{shelfNo}</if>
+            <if test="materialNo != null  and materialNo != ''"> and material_no = #{materialNo}</if>
+            <if test="materialName != null  and materialName != ''"> and material_name like concat('%', #{materialName}, '%')</if>
+            <if test="materialType != null  and materialType != ''"> and material_type = #{materialType}</if>
+            <if test="materialSpecs != null  and materialSpecs != ''"> and material_specs = #{materialSpecs}</if>
+            <if test="nums != null "> and nums = #{nums}</if>
+        </where>
+    </select>
+    
+    <select id="selectMmsInstoreDetailById" parameterType="Long" resultMap="MmsInstoreDetailResult">
+        <include refid="selectMmsInstoreDetailVo"/>
+        where ID = #{id}
+    </select>
+        
+    <insert id="insertMmsInstoreDetail" parameterType="MmsInstoreDetail" useGeneratedKeys="true" keyProperty="id">
+        insert into mms_instore_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="instockNo != null and instockNo != ''">instock_no,</if>
+            <if test="shelfNo != null and shelfNo != ''">shelf_no,</if>
+            <if test="materialNo != null and materialNo != ''">material_no,</if>
+            <if test="materialName != null and materialName != ''">material_name,</if>
+            <if test="materialType != null and materialType != ''">material_type,</if>
+            <if test="materialSpecs != null and materialSpecs != ''">material_specs,</if>
+            <if test="nums != null">nums,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="instockNo != null and instockNo != ''">#{instockNo},</if>
+            <if test="shelfNo != null and shelfNo != ''">#{shelfNo},</if>
+            <if test="materialNo != null and materialNo != ''">#{materialNo},</if>
+            <if test="materialName != null and materialName != ''">#{materialName},</if>
+            <if test="materialType != null and materialType != ''">#{materialType},</if>
+            <if test="materialSpecs != null and materialSpecs != ''">#{materialSpecs},</if>
+            <if test="nums != null">#{nums},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMmsInstoreDetail" parameterType="MmsInstoreDetail">
+        update mms_instore_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="instockNo != null and instockNo != ''">instock_no = #{instockNo},</if>
+            <if test="shelfNo != null and shelfNo != ''">shelf_no = #{shelfNo},</if>
+            <if test="materialNo != null and materialNo != ''">material_no = #{materialNo},</if>
+            <if test="materialName != null and materialName != ''">material_name = #{materialName},</if>
+            <if test="materialType != null and materialType != ''">material_type = #{materialType},</if>
+            <if test="materialSpecs != null and materialSpecs != ''">material_specs = #{materialSpecs},</if>
+            <if test="nums != null">nums = #{nums},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where ID = #{id}
+    </update>
+
+    <delete id="deleteMmsInstoreDetailById" parameterType="Long">
+        delete from mms_instore_detail where ID = #{id}
+    </delete>
+
+    <delete id="deleteMmsInstoreDetailByIds" parameterType="String">
+        delete from mms_instore_detail where ID in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

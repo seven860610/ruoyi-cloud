@@ -87,7 +87,22 @@ export const constantRoutes = [
         meta: { title: '个人中心', icon: 'user' }
       }
     ]
-  }
+  },
+  //入库单新增跳转页面
+  {
+      path: '/material',
+      component: Layout,
+      hidden: true,
+      redirect: 'noredirect',
+      children: [
+        {
+          path: 'instore/edit',
+          component: () => import('@/views/material/order/instore/detailEdit'),
+          name: 'instore',
+          meta: { title: '添加物资入库单', icon: 'material' }
+        }
+      ]
+    }
 ]
 
 // 动态路由，基于用户权限动态去加载

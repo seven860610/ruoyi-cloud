@@ -42,7 +42,6 @@ public class OssController {
     @GetMapping("/getPolicy")
     public P getPolicy() {
         String host = "https://" + bucket + "." + endpoint; // host的格式为 bucketname.endpoint
-        System.out.println("host===================="+host);
         // callbackUrl为 上传回调服务器的URL，请将下面的IP和Port配置为您自己的真实信息。
         // String callbackUrl = "http://88.88.88.88:8888";
         String formatDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
